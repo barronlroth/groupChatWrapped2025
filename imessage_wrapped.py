@@ -782,8 +782,11 @@ body {{ font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(
 .stat-num {{ font-family:var(--font-mono); font-size:24px; font-weight:600; color:var(--cyan); }}
 .stat-lbl {{ font-size:11px; color:var(--muted); margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }}
 
-.rank-list {{ width:100%; max-width:420px; margin-top:20px; }}
+.rank-list {{ width:100%; max-width:420px; margin-top:20px; padding:0 16px; }}
 .rank-item {{ display:flex; align-items:center; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.1); gap:16px; }}
+.rank-item:first-child {{ background:linear-gradient(90deg, rgba(74,222,128,0.15) 0%, transparent 100%); padding:14px 12px; margin:0 -12px; border-radius:8px; border-bottom:none; }}
+.rank-item:first-child .rank-name {{ font-weight:600; color:var(--green); }}
+.rank-item:first-child .rank-count {{ font-size:20px; }}
 .rank-num {{ font-family:var(--font-mono); font-size:20px; font-weight:600; color:var(--green); width:36px; text-align:center; }}
 .rank-name {{ flex:1; font-size:16px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
 .rank-count {{ font-family:var(--font-mono); font-size:18px; font-weight:600; color:var(--yellow); }}
@@ -1113,12 +1116,14 @@ def main():
         year = "2024"
     
     print(f"[*] Analyzing {year}...")
+    print("    ⏳ Reading message database...", end='', flush=True)
     data = analyze(ts_start, ts_jun)
-    print(f"    ✓ {data['stats'][0]:,} messages")
+    print(f"\r    ✓ {data['stats'][0]:,} messages analyzed    ")
     
-    print(f"[*] Generating...")
+    print(f"[*] Generating report...")
+    print("    ⏳ Building your wrapped...", end='', flush=True)
     gen_html(data, contacts, args.output)
-    print(f"    ✓ {args.output}")
+    print(f"\r    ✓ Saved to {args.output}       ")
     
     subprocess.run(['open', args.output])
     print("\n  Done! Click through your wrapped.\n")
