@@ -100,11 +100,54 @@ def q(sql):
 
 def analyze(ts_start, ts_jun):
     d = {}
-    # Stats: handle NULL from SUM when 0 messages
-    raw_stats = q(f"SELECT COUNT(*), SUM(CASE WHEN is_from_me=1 THEN 1 ELSE 0 END), SUM(CASE WHEN is_from_me=0 THEN 1 ELSE 0 END), COUNT(DISTINCT handle_id) FROM message WHERE (date/1000000000+978307200)>{ts_start}")[0]
+
+    # === IDENTIFY 1:1 vs GROUP CHATS ===
+    # 1:1 chats have exactly 1 participant in chat_handle_join
+    # Group chats have 2+ participants
+    # We'll use this CTE pattern to filter queries
+
+    # Common table expression for 1:1 chat filtering
+    one_on_one_cte = """
+        WITH chat_participants AS (
+            SELECT chat_id, COUNT(*) as participant_count
+            FROM chat_handle_join
+            GROUP BY chat_id
+        ),
+        one_on_one_messages AS (
+            SELECT m.ROWID as msg_id
+            FROM message m
+            JOIN chat_message_join cmj ON m.ROWID = cmj.message_id
+            JOIN chat_participants cp ON cmj.chat_id = cp.chat_id
+            WHERE cp.participant_count = 1
+        )
+    """
+
+    # Stats: handle NULL from SUM when 0 messages (1:1 only)
+    raw_stats = q(f"""{one_on_one_cte}
+        SELECT COUNT(*), SUM(CASE WHEN is_from_me=1 THEN 1 ELSE 0 END), SUM(CASE WHEN is_from_me=0 THEN 1 ELSE 0 END), COUNT(DISTINCT handle_id)
+        FROM message m
+        WHERE (date/1000000000+978307200)>{ts_start}
+        AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
+    """)[0]
     d['stats'] = (raw_stats[0] or 0, raw_stats[1] or 0, raw_stats[2] or 0, raw_stats[3] or 0)
-    d['top'] = q(f"SELECT h.id, COUNT(*) t, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END), SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END) FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} GROUP BY h.id ORDER BY t DESC LIMIT 20")
-    d['late'] = q(f"SELECT h.id, COUNT(*) n FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} AND CAST(strftime('%H',datetime((m.date/1000000000+978307200),'unixepoch','localtime')) AS INT)<5 GROUP BY h.id HAVING n>5 ORDER BY n DESC LIMIT 5")
+
+    # Top contacts (1:1 only)
+    d['top'] = q(f"""{one_on_one_cte}
+        SELECT h.id, COUNT(*) t, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END), SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END)
+        FROM message m JOIN handle h ON m.handle_id=h.ROWID
+        WHERE (m.date/1000000000+978307200)>{ts_start}
+        AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
+        GROUP BY h.id ORDER BY t DESC LIMIT 20
+    """)
+
+    # Late night texters (1:1 only)
+    d['late'] = q(f"""{one_on_one_cte}
+        SELECT h.id, COUNT(*) n FROM message m JOIN handle h ON m.handle_id=h.ROWID
+        WHERE (m.date/1000000000+978307200)>{ts_start}
+        AND CAST(strftime('%H',datetime((m.date/1000000000+978307200),'unixepoch','localtime')) AS INT)<5
+        AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
+        GROUP BY h.id HAVING n>5 ORDER BY n DESC LIMIT 5
+    """)
     
     r = q(f"SELECT CAST(strftime('%H',datetime((date/1000000000+978307200),'unixepoch','localtime')) AS INT) h, COUNT(*) c FROM message WHERE (date/1000000000+978307200)>{ts_start} GROUP BY h ORDER BY c DESC LIMIT 1")
     d['hour'] = r[0][0] if r else 12
@@ -112,18 +155,63 @@ def analyze(ts_start, ts_jun):
     r = q(f"SELECT CAST(strftime('%w',datetime((date/1000000000+978307200),'unixepoch','localtime')) AS INT) d, COUNT(*) FROM message WHERE (date/1000000000+978307200)>{ts_start} GROUP BY d ORDER BY 2 DESC LIMIT 1")
     d['day'] = days[r[0][0]] if r else '???'
     
-    d['ghosted'] = q(f"SELECT h.id, SUM(CASE WHEN m.is_from_me=0 AND (m.date/1000000000+978307200)<{ts_jun} THEN 1 ELSE 0 END) b, SUM(CASE WHEN m.is_from_me=0 AND (m.date/1000000000+978307200)>={ts_jun} THEN 1 ELSE 0 END) a FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start-31536000} GROUP BY h.id HAVING b>10 AND a<3 ORDER BY b DESC LIMIT 5")
-    d['heating'] = q(f"SELECT h.id, SUM(CASE WHEN (m.date/1000000000+978307200)<{ts_jun} THEN 1 ELSE 0 END) h1, SUM(CASE WHEN (m.date/1000000000+978307200)>={ts_jun} THEN 1 ELSE 0 END) h2 FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} GROUP BY h.id HAVING h1>20 AND h2>h1*1.5 ORDER BY (h2-h1) DESC LIMIT 5")
-    d['fan'] = q(f"SELECT h.id, SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END) t, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END) y FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} GROUP BY h.id HAVING t>y*2 AND (t+y)>100 ORDER BY (t*1.0/NULLIF(y,0)) DESC LIMIT 5")
-    d['simp'] = q(f"SELECT h.id, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END) y, SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END) t FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} GROUP BY h.id HAVING y>t*2 AND (t+y)>100 ORDER BY (y*1.0/NULLIF(t,0)) DESC LIMIT 5")
+    # Ghosted (1:1 only)
+    d['ghosted'] = q(f"""{one_on_one_cte}
+        SELECT h.id, SUM(CASE WHEN m.is_from_me=0 AND (m.date/1000000000+978307200)<{ts_jun} THEN 1 ELSE 0 END) b, SUM(CASE WHEN m.is_from_me=0 AND (m.date/1000000000+978307200)>={ts_jun} THEN 1 ELSE 0 END) a
+        FROM message m JOIN handle h ON m.handle_id=h.ROWID
+        WHERE (m.date/1000000000+978307200)>{ts_start-31536000}
+        AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
+        GROUP BY h.id HAVING b>10 AND a<3 ORDER BY b DESC LIMIT 5
+    """)
+
+    # Heating up (1:1 only)
+    d['heating'] = q(f"""{one_on_one_cte}
+        SELECT h.id, SUM(CASE WHEN (m.date/1000000000+978307200)<{ts_jun} THEN 1 ELSE 0 END) h1, SUM(CASE WHEN (m.date/1000000000+978307200)>={ts_jun} THEN 1 ELSE 0 END) h2
+        FROM message m JOIN handle h ON m.handle_id=h.ROWID
+        WHERE (m.date/1000000000+978307200)>{ts_start}
+        AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
+        GROUP BY h.id HAVING h1>20 AND h2>h1*1.5 ORDER BY (h2-h1) DESC LIMIT 5
+    """)
+
+    # Biggest fan (1:1 only)
+    d['fan'] = q(f"""{one_on_one_cte}
+        SELECT h.id, SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END) t, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END) y
+        FROM message m JOIN handle h ON m.handle_id=h.ROWID
+        WHERE (m.date/1000000000+978307200)>{ts_start}
+        AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
+        GROUP BY h.id HAVING t>y*2 AND (t+y)>100 ORDER BY (t*1.0/NULLIF(y,0)) DESC LIMIT 5
+    """)
+
+    # Simp (1:1 only)
+    d['simp'] = q(f"""{one_on_one_cte}
+        SELECT h.id, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END) y, SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END) t
+        FROM message m JOIN handle h ON m.handle_id=h.ROWID
+        WHERE (m.date/1000000000+978307200)>{ts_start}
+        AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
+        GROUP BY h.id HAVING y>t*2 AND (t+y)>100 ORDER BY (y*1.0/NULLIF(t,0)) DESC LIMIT 5
+    """)
     
-    # Response time: partition by handle_id so we measure per-conversation
+    # Response time: partition by handle_id so we measure per-conversation (1:1 only)
     r = q(f"""
-        WITH g AS (
-            SELECT (date/1000000000+978307200) ts, is_from_me, handle_id,
-                   LAG(date/1000000000+978307200) OVER (PARTITION BY handle_id ORDER BY date) pt,
-                   LAG(is_from_me) OVER (PARTITION BY handle_id ORDER BY date) pf
-            FROM message WHERE (date/1000000000+978307200)>{ts_start}
+        WITH chat_participants AS (
+            SELECT chat_id, COUNT(*) as participant_count
+            FROM chat_handle_join
+            GROUP BY chat_id
+        ),
+        one_on_one_messages AS (
+            SELECT m.ROWID as msg_id
+            FROM message m
+            JOIN chat_message_join cmj ON m.ROWID = cmj.message_id
+            JOIN chat_participants cp ON cmj.chat_id = cp.chat_id
+            WHERE cp.participant_count = 1
+        ),
+        g AS (
+            SELECT (m.date/1000000000+978307200) ts, m.is_from_me, m.handle_id,
+                   LAG(m.date/1000000000+978307200) OVER (PARTITION BY m.handle_id ORDER BY m.date) pt,
+                   LAG(m.is_from_me) OVER (PARTITION BY m.handle_id ORDER BY m.date) pf
+            FROM message m
+            WHERE (m.date/1000000000+978307200)>{ts_start}
+            AND m.ROWID IN (SELECT msg_id FROM one_on_one_messages)
         )
         SELECT AVG(ts-pt)/60.0 FROM g
         WHERE is_from_me=1 AND pf=0 AND (ts-pt)<86400 AND (ts-pt)>10
@@ -194,6 +282,97 @@ def analyze(ts_start, ts_jun):
     elif d['starter_pct'] > 65: d['personality'] = ("CONVERSATION STARTER", "always making the first move")
     elif d['starter_pct'] < 35: d['personality'] = ("THE WAITER", "never texts first, ever")
     else: d['personality'] = ("SUSPICIOUSLY NORMAL", "no notes. boring but stable.")
+
+    # === GROUP CHAT STATS ===
+    # Group chats have 2+ participants in chat_handle_join
+    group_chat_cte = """
+        WITH chat_participants AS (
+            SELECT chat_id, COUNT(*) as participant_count
+            FROM chat_handle_join
+            GROUP BY chat_id
+        ),
+        group_chats AS (
+            SELECT chat_id FROM chat_participants WHERE participant_count >= 2
+        ),
+        group_messages AS (
+            SELECT m.ROWID as msg_id, cmj.chat_id
+            FROM message m
+            JOIN chat_message_join cmj ON m.ROWID = cmj.message_id
+            WHERE cmj.chat_id IN (SELECT chat_id FROM group_chats)
+        )
+    """
+
+    # Group chat overview: count of groups, total messages, sent by you
+    r = q(f"""{group_chat_cte}
+        SELECT
+            (SELECT COUNT(DISTINCT chat_id) FROM group_messages gm
+             JOIN message m ON gm.msg_id = m.ROWID
+             WHERE (m.date/1000000000+978307200)>{ts_start}) as group_count,
+            COUNT(*) as total_msgs,
+            SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END) as sent
+        FROM message m
+        WHERE (m.date/1000000000+978307200)>{ts_start}
+        AND m.ROWID IN (SELECT msg_id FROM group_messages)
+    """)
+    if r and r[0][0]:
+        d['group_stats'] = {
+            'count': r[0][0] or 0,
+            'total': r[0][1] or 0,
+            'sent': r[0][2] or 0
+        }
+    else:
+        d['group_stats'] = {'count': 0, 'total': 0, 'sent': 0}
+
+    # Group chat leaderboard: top 5 most active group chats
+    # Get chat_id, display_name, message count, and participant handles for name fallback
+    r = q(f"""
+        WITH chat_participants AS (
+            SELECT chat_id, COUNT(*) as participant_count
+            FROM chat_handle_join
+            GROUP BY chat_id
+        ),
+        group_chats AS (
+            SELECT chat_id FROM chat_participants WHERE participant_count >= 2
+        ),
+        group_messages AS (
+            SELECT m.ROWID as msg_id, cmj.chat_id
+            FROM message m
+            JOIN chat_message_join cmj ON m.ROWID = cmj.message_id
+            WHERE cmj.chat_id IN (SELECT chat_id FROM group_chats)
+            AND (m.date/1000000000+978307200)>{ts_start}
+        )
+        SELECT
+            c.ROWID as chat_id,
+            c.display_name,
+            COUNT(*) as msg_count,
+            (SELECT COUNT(*) FROM chat_handle_join WHERE chat_id = c.ROWID) as participant_count
+        FROM chat c
+        JOIN group_messages gm ON c.ROWID = gm.chat_id
+        GROUP BY c.ROWID
+        ORDER BY msg_count DESC
+        LIMIT 5
+    """)
+    d['group_leaderboard'] = []
+    for row in r:
+        chat_id, display_name, msg_count, participant_count = row
+        if display_name:
+            name = display_name
+        else:
+            # Get first 2 participant names for fallback
+            handles = q(f"""
+                SELECT h.id FROM chat_handle_join chj
+                JOIN handle h ON chj.handle_id = h.ROWID
+                WHERE chj.chat_id = {chat_id}
+                LIMIT 2
+            """)
+            name = handles  # Will be resolved to names in gen_html
+        d['group_leaderboard'].append({
+            'chat_id': chat_id,
+            'name': name,
+            'msg_count': msg_count,
+            'participant_count': participant_count
+        })
+
     return d
 
 def gen_html(d, contacts, path):
@@ -403,7 +582,55 @@ def gen_html(d, contacts, path):
             <div class="slide-text">your emotional range</div>
             <div class="emoji-row">{emo}</div>
         </div>''')
-    
+
+    # === GROUP CHAT SLIDES ===
+    gs = d['group_stats']
+    if gs['count'] > 0:
+        # Calculate lurker vs contributor ratio
+        lurker_pct = round((1 - gs['sent'] / max(gs['total'], 1)) * 100)
+        lurker_label = "LURKER" if lurker_pct > 60 else "CONTRIBUTOR" if lurker_pct < 40 else "BALANCED"
+        lurker_class = "yellow" if lurker_pct > 60 else "green" if lurker_pct < 40 else "cyan"
+
+        # Slide: Group Chat Overview
+        slides.append(f'''
+        <div class="slide purple-bg">
+            <div class="slide-label">// GROUP CHATS</div>
+            <div class="slide-text">you're in</div>
+            <div class="big-number cyan">{gs['count']}</div>
+            <div class="slide-text">group chats</div>
+            <div class="stat-grid">
+                <div class="stat-item"><span class="stat-num">{gs['total']:,}</span><span class="stat-lbl">messages</span></div>
+                <div class="stat-item"><span class="stat-num">{gs['sent']:,}</span><span class="stat-lbl">by you</span></div>
+            </div>
+            <div class="badge {lurker_class}">{lurker_label}</div>
+        </div>''')
+
+        # Slide: Group Chat Leaderboard
+        if d['group_leaderboard']:
+            # Helper to format group name
+            def format_group_name(gc):
+                if isinstance(gc['name'], str):
+                    return gc['name']
+                else:
+                    # gc['name'] is a list of handle tuples from SQL
+                    handles = gc['name']
+                    names = [n(h[0]) for h in handles[:2]]
+                    extra = gc['participant_count'] - len(names)
+                    if extra > 0:
+                        return f"{', '.join(names)} +{extra}"
+                    return ', '.join(names)
+
+            gc_html = ''.join([
+                f'<div class="rank-item"><span class="rank-num">{i}</span><span class="rank-name">{format_group_name(gc)}</span><span class="rank-count">{gc["msg_count"]:,}</span></div>'
+                for i, gc in enumerate(d['group_leaderboard'][:5], 1)
+            ])
+            slides.append(f'''
+            <div class="slide">
+                <div class="slide-label">// TOP GROUP CHATS</div>
+                <div class="slide-text">most active</div>
+                <div class="rank-list">{gc_html}</div>
+            </div>''')
+
     # Final slide: Summary card
     top3_names = ', '.join([n(h) for h,_,_,_ in top[:3]]) if top else "No contacts"
     slides.append(f'''
