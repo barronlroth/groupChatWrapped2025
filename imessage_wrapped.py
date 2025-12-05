@@ -18,7 +18,13 @@ TS_JUN_2024 = 1717200000
 def normalize_phone(phone):
     if not phone: return None
     digits = re.sub(r'\D', '', str(phone))
-    if len(digits) == 11 and digits.startswith('1'): digits = digits[1:]
+    # Handle common international prefixes
+    if len(digits) == 11 and digits.startswith('1'):
+        digits = digits[1:]  # US/Canada +1
+    elif len(digits) > 10:
+        # For international numbers, store full digits for exact matching
+        # but also try common formats
+        return digits
     return digits[-10:] if len(digits) >= 10 else (digits if len(digits) >= 7 else None)
 
 def extract_contacts():
@@ -35,8 +41,17 @@ def extract_contacts():
                 if name: people[row[0]] = name
             for owner, phone in conn.execute("SELECT ZOWNER, ZFULLNUMBER FROM ZABCDPHONENUMBER WHERE ZFULLNUMBER IS NOT NULL"):
                 if owner in people:
-                    norm = normalize_phone(phone)
-                    if norm: contacts[norm] = people[owner]
+                    name = people[owner]
+                    digits = re.sub(r'\D', '', str(phone))
+                    # Store multiple formats for better matching
+                    if digits:
+                        contacts[digits] = name  # Full international
+                        if len(digits) >= 10:
+                            contacts[digits[-10:]] = name  # Last 10
+                        if len(digits) >= 7:
+                            contacts[digits[-7:]] = name  # Last 7 (local)
+                        if len(digits) == 11 and digits.startswith('1'):
+                            contacts[digits[1:]] = name  # Without US prefix
             for owner, email in conn.execute("SELECT ZOWNER, ZADDRESS FROM ZABCDEMAILADDRESS WHERE ZADDRESS IS NOT NULL"):
                 if owner in people: contacts[email.lower().strip()] = people[owner]
             conn.close()
@@ -44,9 +59,24 @@ def extract_contacts():
     return contacts
 
 def get_name(handle, contacts):
-    lookup = handle.lower().strip() if '@' in handle else normalize_phone(handle)
-    if lookup and lookup in contacts: return contacts[lookup]
-    return handle.split('@')[0] if '@' in handle else handle
+    if '@' in handle:
+        lookup = handle.lower().strip()
+        if lookup in contacts: return contacts[lookup]
+        return handle.split('@')[0]
+    # Try multiple phone formats for matching
+    digits = re.sub(r'\D', '', str(handle))
+    # Try full digits first (international)
+    if digits in contacts: return contacts[digits]
+    # Try without leading 1 (US/Canada)
+    if len(digits) == 11 and digits.startswith('1'):
+        if digits[1:] in contacts: return contacts[digits[1:]]
+    # Try last 10 digits
+    if len(digits) >= 10 and digits[-10:] in contacts:
+        return contacts[digits[-10:]]
+    # Try last 7 digits (local)
+    if len(digits) >= 7 and digits[-7:] in contacts:
+        return contacts[digits[-7:]]
+    return handle
 
 def check_access():
     if not os.path.exists(IMESSAGE_DB):
@@ -70,7 +100,9 @@ def q(sql):
 
 def analyze(ts_start, ts_jun):
     d = {}
-    d['stats'] = q(f"SELECT COUNT(*), SUM(CASE WHEN is_from_me=1 THEN 1 ELSE 0 END), SUM(CASE WHEN is_from_me=0 THEN 1 ELSE 0 END), COUNT(DISTINCT handle_id) FROM message WHERE (date/1000000000+978307200)>{ts_start}")[0]
+    # Stats: handle NULL from SUM when 0 messages
+    raw_stats = q(f"SELECT COUNT(*), SUM(CASE WHEN is_from_me=1 THEN 1 ELSE 0 END), SUM(CASE WHEN is_from_me=0 THEN 1 ELSE 0 END), COUNT(DISTINCT handle_id) FROM message WHERE (date/1000000000+978307200)>{ts_start}")[0]
+    d['stats'] = (raw_stats[0] or 0, raw_stats[1] or 0, raw_stats[2] or 0, raw_stats[3] or 0)
     d['top'] = q(f"SELECT h.id, COUNT(*) t, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END), SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END) FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} GROUP BY h.id ORDER BY t DESC LIMIT 20")
     d['late'] = q(f"SELECT h.id, COUNT(*) n FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} AND CAST(strftime('%H',datetime((m.date/1000000000+978307200),'unixepoch','localtime')) AS INT)<5 GROUP BY h.id HAVING n>5 ORDER BY n DESC LIMIT 5")
     
@@ -85,7 +117,17 @@ def analyze(ts_start, ts_jun):
     d['fan'] = q(f"SELECT h.id, SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END) t, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END) y FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} GROUP BY h.id HAVING t>y*2 AND (t+y)>100 ORDER BY (t*1.0/NULLIF(y,0)) DESC LIMIT 5")
     d['simp'] = q(f"SELECT h.id, SUM(CASE WHEN m.is_from_me=1 THEN 1 ELSE 0 END) y, SUM(CASE WHEN m.is_from_me=0 THEN 1 ELSE 0 END) t FROM message m JOIN handle h ON m.handle_id=h.ROWID WHERE (m.date/1000000000+978307200)>{ts_start} GROUP BY h.id HAVING y>t*2 AND (t+y)>100 ORDER BY (y*1.0/NULLIF(t,0)) DESC LIMIT 5")
     
-    r = q(f"WITH g AS (SELECT (date/1000000000+978307200) ts, is_from_me, LAG(date/1000000000+978307200) OVER (ORDER BY date) pt, LAG(is_from_me) OVER (ORDER BY date) pf FROM message WHERE (date/1000000000+978307200)>{ts_start}) SELECT AVG(ts-pt)/60.0 FROM g WHERE is_from_me=1 AND pf=0 AND (ts-pt)<86400 AND (ts-pt)>10")
+    # Response time: partition by handle_id so we measure per-conversation
+    r = q(f"""
+        WITH g AS (
+            SELECT (date/1000000000+978307200) ts, is_from_me, handle_id,
+                   LAG(date/1000000000+978307200) OVER (PARTITION BY handle_id ORDER BY date) pt,
+                   LAG(is_from_me) OVER (PARTITION BY handle_id ORDER BY date) pf
+            FROM message WHERE (date/1000000000+978307200)>{ts_start}
+        )
+        SELECT AVG(ts-pt)/60.0 FROM g
+        WHERE is_from_me=1 AND pf=0 AND (ts-pt)<86400 AND (ts-pt)>10
+    """)
     d['resp'] = int(r[0][0] or 30)
     
     emojis = ['😂','❤️','😭','🔥','💀','✨','🙏','👀','💯','😈']
@@ -95,8 +137,22 @@ def analyze(ts_start, ts_jun):
         counts[e] = r[0][0]
     d['emoji'] = sorted(counts.items(), key=lambda x:-x[1])[:5]
     
-    # NEW: Total words sent
-    r = q(f"SELECT SUM(LENGTH(text) - LENGTH(REPLACE(text, ' ', '')) + 1) FROM message WHERE (date/1000000000+978307200)>{ts_start} AND is_from_me=1 AND text IS NOT NULL AND text != ''")
+    # Total words sent (excluding reactions and empty messages)
+    r = q(f"""
+        SELECT SUM(
+            LENGTH(TRIM(text)) - LENGTH(REPLACE(TRIM(text), ' ', '')) + 1
+        ) FROM message
+        WHERE (date/1000000000+978307200)>{ts_start}
+        AND is_from_me=1
+        AND text IS NOT NULL
+        AND TRIM(text) != ''
+        AND text NOT LIKE 'Loved "%'
+        AND text NOT LIKE 'Liked "%'
+        AND text NOT LIKE 'Disliked "%'
+        AND text NOT LIKE 'Laughed at "%'
+        AND text NOT LIKE 'Emphasized "%'
+        AND text NOT LIKE 'Questioned "%'
+    """)
     d['words'] = r[0][0] or 0
     
     # NEW: Busiest day
@@ -121,8 +177,9 @@ def analyze(ts_start, ts_jun):
         FROM convos 
         WHERE prev_ts IS NULL OR (ts - prev_ts) > 14400
     """)
-    if r and r[0][1] > 0:
-        d['starter_pct'] = round((r[0][0] / r[0][1]) * 100)
+    if r and r[0][1] and r[0][1] > 0:
+        you_started = r[0][0] or 0
+        d['starter_pct'] = round((you_started / r[0][1]) * 100)
     else:
         d['starter_pct'] = 50
     
@@ -145,20 +202,34 @@ def gen_html(d, contacts, path):
     n = lambda h: get_name(h, contacts)
     ptype, proast = d['personality']
     hr = d['hour']
-    hr_str = f"{hr}AM" if hr < 12 else f"{hr-12 if hr > 12 else 12}PM"
+    # Format hour: 0->12AM, 1-11->AM, 12->12PM, 13-23->PM
+    if hr == 0:
+        hr_str = "12AM"
+    elif hr < 12:
+        hr_str = f"{hr}AM"
+    elif hr == 12:
+        hr_str = "12PM"
+    else:
+        hr_str = f"{hr-12}PM"
     
     # Format busiest day
+    from datetime import datetime as dt
     if d['busiest_day']:
-        from datetime import datetime as dt
         bd = dt.strptime(d['busiest_day'][0], '%Y-%m-%d')
         busiest_str = bd.strftime('%b %d')
         busiest_count = d['busiest_day'][1]
     else:
         busiest_str = "N/A"
         busiest_count = 0
-    
+
+    # Calculate days elapsed in the year for accurate per-day stats
+    now = dt.now()
+    year_start = dt(now.year, 1, 1)
+    days_elapsed = max(1, (now - year_start).days)  # At least 1 to avoid div by zero
+    msgs_per_day = s[0] // days_elapsed
+
     slides = []
-    
+
     # Slide 1: Intro
     slides.append('''
     <div class="slide intro">
@@ -167,7 +238,7 @@ def gen_html(d, contacts, path):
         <p class="subtitle">your 2025 texting habits, exposed</p>
         <div class="tap-hint">click anywhere to start →</div>
     </div>''')
-    
+
     # Slide 2: Total messages
     slides.append(f'''
     <div class="slide">
@@ -175,40 +246,43 @@ def gen_html(d, contacts, path):
         <div class="big-number green">{s[0]:,}</div>
         <div class="slide-text">messages this year</div>
         <div class="stat-grid">
-            <div class="stat-item"><span class="stat-num">{s[0]//365}</span><span class="stat-lbl">/day</span></div>
+            <div class="stat-item"><span class="stat-num">{msgs_per_day}</span><span class="stat-lbl">/day</span></div>
             <div class="stat-item"><span class="stat-num">{s[1]:,}</span><span class="stat-lbl">sent</span></div>
             <div class="stat-item"><span class="stat-num">{s[2]:,}</span><span class="stat-lbl">received</span></div>
         </div>
     </div>''')
     
     # Slide 3: Words sent
-    words_k = d['words'] // 1000
+    words = d['words']
+    words_display = f"{words // 1000:,}K" if words >= 1000 else f"{words:,}"
+    pages = max(1, words // 250)  # At least 1 page
     slides.append(f'''
     <div class="slide">
         <div class="slide-label">// WORD COUNT</div>
-        <div class="big-number cyan">{words_k:,}K</div>
+        <div class="big-number cyan">{words_display}</div>
         <div class="slide-text">words you typed</div>
-        <div class="roast">that's about {d['words']//250:,} pages of a novel</div>
+        <div class="roast">that's about {pages:,} pages of a novel</div>
     </div>''')
     
-    # Slide 4: Your #1
-    slides.append(f'''
-    <div class="slide pink-bg">
-        <div class="slide-label">// YOUR #1</div>
-        <div class="slide-text">most texted person</div>
-        <div class="huge-name">{n(top[0][0])}</div>
-        <div class="big-number yellow">{top[0][1]:,}</div>
-        <div class="slide-text">messages</div>
-    </div>''')
-    
-    # Slide 5: Top 5
-    top5_html = ''.join([f'<div class="rank-item"><span class="rank-num">{i}</span><span class="rank-name">{n(h)}</span><span class="rank-count">{t:,}</span></div>' for i,(h,t,_,_) in enumerate(top[:5],1)])
-    slides.append(f'''
-    <div class="slide">
-        <div class="slide-label">// INNER CIRCLE</div>
-        <div class="slide-text">your top 5</div>
-        <div class="rank-list">{top5_html}</div>
-    </div>''')
+    # Slide 4: Your #1 (only if we have contacts)
+    if top:
+        slides.append(f'''
+        <div class="slide pink-bg">
+            <div class="slide-label">// YOUR #1</div>
+            <div class="slide-text">most texted person</div>
+            <div class="huge-name">{n(top[0][0])}</div>
+            <div class="big-number yellow">{top[0][1]:,}</div>
+            <div class="slide-text">messages</div>
+        </div>''')
+
+        # Slide 5: Top 5
+        top5_html = ''.join([f'<div class="rank-item"><span class="rank-num">{i}</span><span class="rank-name">{n(h)}</span><span class="rank-count">{t:,}</span></div>' for i,(h,t,_,_) in enumerate(top[:5],1)])
+        slides.append(f'''
+        <div class="slide">
+            <div class="slide-label">// INNER CIRCLE</div>
+            <div class="slide-text">your top 5</div>
+            <div class="rank-list">{top5_html}</div>
+        </div>''')
     
     # Slide 6: Personality
     slides.append(f'''
@@ -331,7 +405,7 @@ def gen_html(d, contacts, path):
         </div>''')
     
     # Final slide: Summary card
-    top3_names = ', '.join([n(h) for h,_,_,_ in top[:3]])
+    top3_names = ', '.join([n(h) for h,_,_,_ in top[:3]]) if top else "No contacts"
     slides.append(f'''
     <div class="slide summary-slide">
         <div class="summary-card" id="summaryCard">
@@ -351,7 +425,7 @@ def gen_html(d, contacts, path):
                     <span class="summary-stat-lbl">people</span>
                 </div>
                 <div class="summary-stat">
-                    <span class="summary-stat-val">{words_k:,}K</span>
+                    <span class="summary-stat-val">{words_display}</span>
                     <span class="summary-stat-lbl">words</span>
                 </div>
                 <div class="summary-stat">

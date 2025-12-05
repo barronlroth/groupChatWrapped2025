@@ -318,9 +318,19 @@ body {
     font-weight: bold;
 }
 
-/* Hide share on desktop, download on mobile */
-.share-btn { display: none; }
-.mobile-note { display: none; }
+/* Show share by default, hide download - reversed for mobile-first */
+.share-btn { display: inline-flex !important; }
+.download-btn { display: none !important; }
+.mobile-note { display: block !important; margin-top: 16px; font-size: 14px; color: var(--muted); }
+.theme-toggle .label { display: none; }
+
+/* Only show download button on desktop with mouse (non-touch devices) */
+@media (hover: hover) and (pointer: fine) and (min-width: 1025px) {
+    .share-btn { display: none !important; }
+    .download-btn { display: inline-flex !important; }
+    .mobile-note { display: none !important; }
+    .theme-toggle .label { display: inline; }
+}
 
 /* GALLERY in hero */
 .hero-gallery {
@@ -822,13 +832,8 @@ kbd {
     }
     .theme-toggle .icon { font-size: 14px; }
 
-    .download-btn { display: none; }
-    .share-btn { display: inline-flex; }
     .mobile-note {
-        display: block;
-        margin-top: 16px;
         font-size: 13px;
-        color: var(--muted);
     }
 
     .hero {
