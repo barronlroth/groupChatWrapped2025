@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>iMessage Wrapped 2025 | Your Texting Stats Revealed</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌯</text></svg>">
 <link rel="canonical" href="https://wrap2025.com">
 
 <!-- Primary Meta Tags -->
@@ -68,7 +68,7 @@
 }
 </script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen&family=Azeret+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap');
 
 :root {
     --bg: #0a0a12;
@@ -114,6 +114,13 @@ body {
     transition: background 0.3s, color 0.3s;
 }
 
+/* Typography Variables */
+:root {
+    --font-pixel: 'Silkscreen', cursive;
+    --font-mono: 'Azeret Mono', monospace;
+    --font-body: 'Space Grotesk', sans-serif;
+}
+
 /* Theme Toggle */
 .theme-toggle {
     position: fixed;
@@ -128,7 +135,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Silkscreen', cursive;
+    font-family: var(--font-pixel);
     font-size: 10px;
     color: var(--text);
     transition: all 0.2s;
@@ -214,9 +221,9 @@ body {
 }
 
 .hero h1 {
-    font-family: 'Silkscreen', cursive;
-    font-size: clamp(42px, 6vw, 72px);
-    line-height: 1.1;
+    font-family: var(--font-pixel);
+    font-size: clamp(36px, 5vw, 52px);
+    line-height: 1.15;
     margin-bottom: 24px;
     animation: fadeSlideIn 0.6s ease-out 0.1s both;
 }
@@ -225,6 +232,7 @@ body {
     color: var(--green);
     display: block;
 }
+
 
 .hero .subtitle {
     font-size: 20px;
@@ -246,8 +254,8 @@ body {
     align-items: center;
     justify-content: center;
     gap: 12px;
-    font-family: 'Silkscreen', cursive;
-    font-size: 14px;
+    font-family: var(--font-pixel);
+    font-size: 12px;
     background: var(--green);
     color: #000;
     text-decoration: none;
@@ -361,19 +369,20 @@ body {
 .gallery-slide.orange-bg { background: var(--card-bg); }
 
 .gallery-slide .slide-icon { font-size: 52px; margin-bottom: 12px; }
-.gallery-slide h2 { font-family: 'Silkscreen', cursive; font-size: 28px; line-height: 1.2; margin-bottom: 8px; color: var(--text); }
-.gallery-slide .slide-label { font-family: 'Silkscreen', cursive; font-size: 11px; color: var(--green); letter-spacing: 2px; margin-bottom: 12px; }
-.gallery-slide .slide-text { font-size: 16px; color: var(--muted); margin: 6px 0; }
-.gallery-slide .big-number { font-family: 'Silkscreen', cursive; font-size: 64px; line-height: 1; color: var(--text); }
-.gallery-slide .huge-name { font-family: 'Silkscreen', cursive; font-size: 28px; margin: 12px 0; color: var(--text); }
-.gallery-slide .personality-type { font-family: 'Silkscreen', cursive; font-size: 20px; color: var(--purple); margin: 12px 0; }
+.gallery-slide h2 { font-family: var(--font-pixel); font-size: 22px; font-weight: 400; line-height: 1.2; margin-bottom: 8px; color: var(--text); }
+.gallery-slide .slide-label { font-family: var(--font-pixel); font-size: 10px; font-weight: 400; color: var(--green); letter-spacing: 0.5px; margin-bottom: 12px; }
+.gallery-slide .slide-text { font-size: 15px; color: var(--muted); margin: 6px 0; }
+.gallery-slide .big-number { font-family: var(--font-mono); font-size: 64px; font-weight: 500; line-height: 1; color: var(--text); letter-spacing: -1px; }
+.gallery-slide .huge-name { font-family: var(--font-body); font-size: 24px; font-weight: 600; margin: 12px 0; color: var(--text); }
+.gallery-slide .personality-type { font-family: var(--font-pixel); font-size: 14px; font-weight: 400; color: var(--purple); margin: 12px 0; text-transform: uppercase; letter-spacing: 0.5px; }
 .gallery-slide .roast { font-style: italic; color: var(--muted); font-size: 14px; }
-.gallery-slide .badge { display: inline-block; padding: 8px 16px; border-radius: 100px; font-family: 'Silkscreen', cursive; font-size: 11px; margin-top: 16px; border: 2px solid; }
+.gallery-slide .badge { display: inline-block; padding: 6px 14px; border-radius: 100px; font-family: var(--font-pixel); font-size: 9px; font-weight: 400; letter-spacing: 0.3px; text-transform: uppercase; margin-top: 16px; border: 2px solid; }
 .gallery-slide .badge.yellow { border-color: var(--yellow); color: var(--yellow); background: rgba(251,191,36,0.1); }
 .gallery-slide .badge.green { border-color: var(--green); color: var(--green); background: rgba(74,222,128,0.1); }
 
 .green { color: var(--green); }
 .yellow { color: var(--yellow); }
+.red { color: var(--red); }
 .cyan { color: var(--cyan); }
 .pink { color: var(--pink); }
 .purple { color: var(--purple); }
@@ -442,10 +451,12 @@ body {
 }
 
 .section-label {
-    font-family: 'Silkscreen', cursive;
-    font-size: 12px;
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    font-weight: 400;
     color: var(--green);
-    letter-spacing: 3px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .section-line {
@@ -500,10 +511,11 @@ body {
 }
 
 .feature-title {
-    font-family: 'Silkscreen', cursive;
-    font-size: 11px;
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    font-weight: 400;
     color: var(--text);
-    letter-spacing: 1px;
+    letter-spacing: 0.2px;
 }
 
 /* INSTALL - Cards layout */
@@ -545,12 +557,13 @@ body {
 }
 
 .step-num {
-    font-family: 'Silkscreen', cursive;
+    font-family: var(--font-mono);
     font-size: 20px;
+    font-weight: 500;
     color: var(--green);
     line-height: 1;
     flex-shrink: 0;
-    padding-top: 2px;
+    padding-top: 4px;
 }
 
 .step-content {
@@ -559,10 +572,10 @@ body {
 }
 
 .step-content h3 {
-    font-family: 'Silkscreen', cursive;
-    font-size: 13px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
     margin: 0 0 6px 0;
-    letter-spacing: 0.5px;
 }
 
 .step-content p {
@@ -609,14 +622,16 @@ kbd {
     border: none;
     border-radius: 6px;
     padding: 8px 14px;
-    font-family: 'Silkscreen', cursive;
+    font-family: var(--font-pixel);
     font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
     color: #000;
     cursor: pointer;
     transition: all 0.15s;
     white-space: nowrap;
     flex-shrink: 0;
-    font-weight: 700;
 }
 
 .copy-btn:hover {
@@ -721,8 +736,9 @@ kbd {
 }
 
 .footer-logo {
-    font-family: 'Silkscreen', cursive;
-    font-size: 16px;
+    font-family: var(--font-pixel);
+    font-size: 12px;
+    font-weight: 400;
     color: var(--green);
 }
 
@@ -776,7 +792,7 @@ kbd {
     }
 
     .features-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 
 
@@ -858,8 +874,8 @@ kbd {
         padding: 24px 20px;
     }
 
-    .gallery-slide .big-number { font-size: 48px; }
-    .gallery-slide .huge-name { font-size: 22px; }
+    .gallery-slide .big-number { font-size: 52px; }
+    .gallery-slide .huge-name { font-size: 24px; }
 
     .container { padding: 0 20px; }
 
@@ -877,7 +893,7 @@ kbd {
     }
 
     .feature-icon { font-size: 28px; margin-bottom: 12px; }
-    .feature-title { font-size: 10px; }
+    .feature-title { font-size: 11px; }
 
     .install-section {
         padding: 60px 0;
@@ -889,10 +905,10 @@ kbd {
     }
 
     .step-num { font-size: 18px; }
-    .step-content h3 { font-size: 12px; }
+    .step-content h3 { font-size: 15px; }
     .step-content p { font-size: 13px; }
     .code-block { font-size: 11px; padding: 10px 12px; }
-    .copy-btn { padding: 6px 12px; font-size: 8px; }
+    .copy-btn { padding: 6px 12px; font-size: 10px; }
 
     kbd { font-size: 11px; padding: 2px 5px; }
 
@@ -928,7 +944,7 @@ kbd {
 
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-badge">New for 2025</div>
+        <div class="hero-badge">Your year in texts</div>
         <h1>iMESSAGE<span class="accent">WRAPPED</span></h1>
         <p class="subtitle">Your texting habits, exposed. See who you text most, your response time, personality type, and more.</p>
         <div class="cta-group">
@@ -989,16 +1005,16 @@ kbd {
                     <div class="gallery-slide">
                         <div class="slide-label">// WHO TEXTS FIRST</div>
                         <div class="slide-text">conversation initiator</div>
-                        <div class="big-number yellow">38<span class="pct">%</span></div>
+                        <div class="big-number green">62<span class="pct">%</span></div>
                         <div class="slide-text">of convos started by you</div>
-                        <div class="badge yellow">THEY START</div>
+                        <div class="badge green">YOU START</div>
                     </div>
 
-                    <div class="gallery-slide orange-bg">
+                    <div class="gallery-slide">
                         <div class="slide-label">// BUSIEST DAY</div>
                         <div class="slide-text">your most unhinged day</div>
                         <div class="big-number orange">Mar 15</div>
-                        <div class="slide-text"><span class="yellow">523</span> messages</div>
+                        <div class="slide-text"><span class="yellow">523</span> messages in one day</div>
                         <div class="roast">what happened??</div>
                     </div>
 
@@ -1063,6 +1079,22 @@ kbd {
             <div class="feature">
                 <span class="feature-icon">😍</span>
                 <div class="feature-title">DOWN BAD</div>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📝</span>
+                <div class="feature-title">WORD COUNT</div>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">⏰</span>
+                <div class="feature-title">PEAK HOURS</div>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🎯</span>
+                <div class="feature-title">WHO TEXTS FIRST</div>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🏆</span>
+                <div class="feature-title">BIGGEST FAN</div>
             </div>
         </div>
     </div>

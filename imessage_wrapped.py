@@ -385,7 +385,7 @@ def gen_html(d, contacts, path):
     num_slides = len(slides)
     
     # Favicon as base64 SVG
-    favicon = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>"
+    favicon = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌯</text></svg>"
     
     html = f'''<!DOCTYPE html>
 <html><head>
@@ -395,7 +395,7 @@ def gen_html(d, contacts, path):
 <link rel="icon" href="{favicon}">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen&family=Azeret+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap');
 
 :root {{
     --bg: #0a0a12;
@@ -408,6 +408,9 @@ def gen_html(d, contacts, path):
     --pink: #f472b6;
     --orange: #fb923c;
     --purple: #a78bfa;
+    --font-pixel: 'Silkscreen', cursive;
+    --font-mono: 'Azeret Mono', monospace;
+    --font-body: 'Space Grotesk', sans-serif;
 }}
 
 * {{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }}
@@ -439,16 +442,16 @@ body {{ font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(
 .slide.red-bg {{ background:linear-gradient(145deg,#12121f 0%,#2d1a1a 100%); }}
 .slide.summary-slide {{ background:linear-gradient(145deg,#0f2847 0%,#12121f 50%,#1a1a2e 100%); }}
 
-.slide h1 {{ font-family:'Silkscreen',cursive; font-size:56px; line-height:1.15; margin:20px 0; letter-spacing:1px; }}
-.slide-label {{ font-family:'Silkscreen',cursive; font-size:14px; color:var(--green); text-transform:uppercase; letter-spacing:3px; margin-bottom:16px; }}
+.slide h1 {{ font-family:var(--font-pixel); font-size:36px; font-weight:400; line-height:1.2; margin:20px 0; }}
+.slide-label {{ font-family:var(--font-pixel); font-size:10px; font-weight:400; color:var(--green); letter-spacing:0.5px; margin-bottom:16px; }}
 .slide-icon {{ font-size:80px; margin-bottom:16px; }}
-.slide-text {{ font-size:20px; color:var(--muted); margin:8px 0; }}
+.slide-text {{ font-size:18px; color:var(--muted); margin:8px 0; }}
 .subtitle {{ font-size:18px; color:var(--muted); margin-top:8px; }}
 
-.big-number {{ font-family:'Silkscreen',cursive; font-size:96px; line-height:1; font-weight:700; }}
-.pct {{ font-family:'Space Grotesk',sans-serif; font-size:64px; }}
-.huge-name {{ font-family:'Silkscreen',cursive; font-size:42px; line-height:1.25; word-break:break-word; max-width:90%; margin:16px 0; }}
-.personality-type {{ font-family:'Silkscreen',cursive; font-size:36px; line-height:1.25; color:var(--purple); margin:24px 0; }}
+.big-number {{ font-family:var(--font-mono); font-size:80px; font-weight:500; line-height:1; letter-spacing:-2px; }}
+.pct {{ font-family:var(--font-body); font-size:48px; }}
+.huge-name {{ font-family:var(--font-body); font-size:32px; font-weight:600; line-height:1.25; word-break:break-word; max-width:90%; margin:16px 0; }}
+.personality-type {{ font-family:var(--font-pixel); font-size:18px; font-weight:400; line-height:1.25; color:var(--purple); margin:24px 0; text-transform:uppercase; letter-spacing:0.5px; }}
 .roast {{ font-style:italic; color:var(--muted); font-size:18px; margin-top:16px; max-width:400px; }}
 
 .green {{ color:var(--green); }}
@@ -461,16 +464,16 @@ body {{ font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(
 
 .stat-grid {{ display:flex; gap:40px; margin-top:28px; }}
 .stat-item {{ display:flex; flex-direction:column; align-items:center; }}
-.stat-num {{ font-family:'Silkscreen',cursive; font-size:28px; color:var(--cyan); }}
-.stat-lbl {{ font-size:14px; color:var(--muted); margin-top:6px; text-transform:uppercase; letter-spacing:1px; }}
+.stat-num {{ font-family:var(--font-mono); font-size:24px; font-weight:600; color:var(--cyan); }}
+.stat-lbl {{ font-size:11px; color:var(--muted); margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }}
 
 .rank-list {{ width:100%; max-width:420px; margin-top:20px; }}
 .rank-item {{ display:flex; align-items:center; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.1); gap:16px; }}
-.rank-num {{ font-family:'Silkscreen',cursive; font-size:24px; color:var(--green); width:36px; text-align:center; }}
-.rank-name {{ flex:1; font-size:18px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
-.rank-count {{ font-family:'Silkscreen',cursive; font-size:18px; color:var(--yellow); }}
+.rank-num {{ font-family:var(--font-mono); font-size:20px; font-weight:600; color:var(--green); width:36px; text-align:center; }}
+.rank-name {{ flex:1; font-size:16px; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+.rank-count {{ font-family:var(--font-mono); font-size:18px; font-weight:600; color:var(--yellow); }}
 
-.badge {{ display:inline-block; padding:10px 24px; border-radius:24px; font-family:'Silkscreen',cursive; font-size:14px; margin-top:20px; border:2px solid; }}
+.badge {{ display:inline-block; padding:8px 18px; border-radius:24px; font-family:var(--font-pixel); font-size:9px; font-weight:400; text-transform:uppercase; letter-spacing:0.3px; margin-top:20px; border:2px solid; }}
 .badge.green {{ border-color:var(--green); color:var(--green); background:rgba(74,222,128,0.1); }}
 .badge.yellow {{ border-color:var(--yellow); color:var(--yellow); background:rgba(251,191,36,0.1); }}
 .badge.red {{ border-color:var(--red); color:var(--red); background:rgba(248,113,113,0.1); }}
@@ -479,6 +482,162 @@ body {{ font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(
 
 .tap-hint {{ position:absolute; bottom:60px; font-size:16px; color:var(--muted); animation:pulse 2s infinite; }}
 @keyframes pulse {{ 0%,100%{{opacity:0.4}} 50%{{opacity:1}} }}
+
+/* === SLIDE ANIMATIONS === */
+/* Elements start hidden, animate when slide is active */
+.slide .slide-label,
+.slide .slide-text,
+.slide .slide-icon,
+.slide .big-number,
+.slide .huge-name,
+.slide .personality-type,
+.slide .roast,
+.slide .badge,
+.slide .stat-grid,
+.slide .rank-list,
+.slide .emoji-row,
+.slide h1,
+.slide .subtitle {{
+    opacity: 0;
+    transform: translateY(20px);
+}}
+
+.slide.active .slide-label {{
+    animation: fadeSlideUp 0.5s ease-out forwards;
+}}
+
+.slide.active .slide-icon {{
+    animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
+}}
+
+.slide.active h1 {{
+    animation: fadeSlideUp 0.6s ease-out 0.15s forwards;
+}}
+
+.slide.active .subtitle {{
+    animation: fadeSlideUp 0.5s ease-out 0.3s forwards;
+}}
+
+.slide.active .slide-text {{
+    animation: fadeSlideUp 0.4s ease-out 0.2s forwards;
+}}
+
+.slide.active .big-number {{
+    animation: countReveal 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+}}
+
+.slide.active .huge-name {{
+    animation: nameReveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+}}
+
+.slide.active .personality-type {{
+    animation: glitchReveal 0.8s ease-out 0.3s forwards;
+}}
+
+.slide.active .roast {{
+    animation: fadeSlideUp 0.5s ease-out 0.6s forwards;
+}}
+
+.slide.active .badge {{
+    animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s forwards;
+}}
+
+.slide.active .stat-grid {{
+    animation: fadeSlideUp 0.5s ease-out 0.5s forwards;
+}}
+
+.slide.active .rank-list {{
+    animation: fadeIn 0.3s ease-out 0.3s forwards;
+}}
+
+.slide.active .rank-item {{
+    opacity: 0;
+    animation: rankCascade 0.4s ease-out forwards;
+}}
+
+.slide.active .rank-item:nth-child(1) {{ animation-delay: 0.35s; }}
+.slide.active .rank-item:nth-child(2) {{ animation-delay: 0.45s; }}
+.slide.active .rank-item:nth-child(3) {{ animation-delay: 0.55s; }}
+.slide.active .rank-item:nth-child(4) {{ animation-delay: 0.65s; }}
+.slide.active .rank-item:nth-child(5) {{ animation-delay: 0.75s; }}
+
+.slide.active .emoji-row {{
+    animation: emojiWave 0.8s ease-out 0.3s forwards;
+}}
+
+/* Summary card special treatment */
+.slide.active .summary-card {{
+    animation: cardReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+}}
+
+.slide.active .screenshot-btn {{
+    opacity: 0;
+    animation: fadeSlideUp 0.5s ease-out 0.8s forwards;
+}}
+
+.slide.active .share-hint {{
+    opacity: 0;
+    animation: fadeSlideUp 0.4s ease-out 1s forwards;
+}}
+
+/* Keyframes */
+@keyframes fadeSlideUp {{
+    from {{ opacity: 0; transform: translateY(20px); }}
+    to {{ opacity: 1; transform: translateY(0); }}
+}}
+
+@keyframes fadeIn {{
+    from {{ opacity: 0; }}
+    to {{ opacity: 1; }}
+}}
+
+@keyframes popIn {{
+    0% {{ opacity: 0; transform: translateY(20px) scale(0.8); }}
+    70% {{ transform: translateY(-5px) scale(1.1); }}
+    100% {{ opacity: 1; transform: translateY(0) scale(1); }}
+}}
+
+@keyframes countReveal {{
+    0% {{ opacity: 0; transform: translateY(30px) scale(0.9); }}
+    60% {{ transform: translateY(-8px) scale(1.02); }}
+    100% {{ opacity: 1; transform: translateY(0) scale(1); }}
+}}
+
+@keyframes nameReveal {{
+    0% {{ opacity: 0; transform: translateY(40px); }}
+    100% {{ opacity: 1; transform: translateY(0); }}
+}}
+
+@keyframes glitchReveal {{
+    0% {{ opacity: 0; transform: translateY(20px); filter: blur(8px); }}
+    20% {{ opacity: 0.5; transform: translateY(10px) skewX(-5deg); filter: blur(4px); }}
+    40% {{ opacity: 0.7; transform: translateY(5px) skewX(3deg); filter: blur(2px); }}
+    60% {{ opacity: 0.9; transform: translateY(-2px) skewX(-1deg); filter: blur(0); }}
+    80% {{ transform: translateY(1px) skewX(0.5deg); }}
+    100% {{ opacity: 1; transform: translateY(0) skewX(0); }}
+}}
+
+@keyframes badgePop {{
+    0% {{ opacity: 0; transform: translateY(10px) scale(0.8); }}
+    70% {{ transform: translateY(-3px) scale(1.1); }}
+    100% {{ opacity: 1; transform: translateY(0) scale(1); }}
+}}
+
+@keyframes rankCascade {{
+    0% {{ opacity: 0; transform: translateX(-30px); }}
+    100% {{ opacity: 1; transform: translateX(0); }}
+}}
+
+@keyframes emojiWave {{
+    0% {{ opacity: 0; transform: translateY(30px) scale(0.8); }}
+    50% {{ transform: translateY(-5px) scale(1.05); }}
+    100% {{ opacity: 1; transform: translateY(0) scale(1); }}
+}}
+
+@keyframes cardReveal {{
+    0% {{ opacity: 0; transform: translateY(40px) scale(0.95); }}
+    100% {{ opacity: 1; transform: translateY(0) scale(1); }}
+}}
 
 .summary-card {{
     background:linear-gradient(145deg,#1a1a2e 0%,#0f1a2e 100%);
@@ -491,25 +650,25 @@ body {{ font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(
 }}
 .summary-header {{ display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.1); }}
 .summary-logo {{ font-size:28px; }}
-.summary-title {{ font-family:'Silkscreen',cursive; font-size:16px; letter-spacing:2px; color:var(--text); }}
+.summary-title {{ font-family:var(--font-pixel); font-size:11px; font-weight:400; color:var(--text); }}
 .summary-hero {{ margin:24px 0; }}
 .summary-big-stat {{ display:flex; flex-direction:column; align-items:center; }}
-.summary-big-num {{ font-family:'Silkscreen',cursive; font-size:64px; color:var(--green); line-height:1; }}
-.summary-big-label {{ font-size:16px; color:var(--muted); text-transform:uppercase; letter-spacing:2px; margin-top:8px; }}
+.summary-big-num {{ font-family:var(--font-mono); font-size:56px; font-weight:600; color:var(--green); line-height:1; letter-spacing:-1px; }}
+.summary-big-label {{ font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:8px; }}
 .summary-stats {{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:24px 0; padding:20px 0; border-top:1px solid rgba(255,255,255,0.1); border-bottom:1px solid rgba(255,255,255,0.1); }}
 .summary-stat {{ display:flex; flex-direction:column; align-items:center; }}
-.summary-stat-val {{ font-family:'Silkscreen',cursive; font-size:20px; color:var(--cyan); }}
-.summary-stat-lbl {{ font-size:11px; color:var(--muted); text-transform:uppercase; margin-top:4px; }}
+.summary-stat-val {{ font-family:var(--font-mono); font-size:20px; font-weight:600; color:var(--cyan); }}
+.summary-stat-lbl {{ font-size:9px; color:var(--muted); text-transform:uppercase; margin-top:4px; letter-spacing:0.3px; }}
 .summary-personality {{ margin:20px 0; }}
-.summary-personality-type {{ font-family:'Silkscreen',cursive; font-size:22px; color:var(--purple); }}
+.summary-personality-type {{ font-family:var(--font-pixel); font-size:12px; font-weight:400; color:var(--purple); text-transform:uppercase; letter-spacing:0.3px; }}
 .summary-top3 {{ margin:16px 0; display:flex; flex-direction:column; gap:6px; }}
-.summary-top3-label {{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }}
-.summary-top3-names {{ font-size:16px; color:var(--text); }}
-.summary-footer {{ margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.1); font-size:14px; color:var(--green); font-family:'Silkscreen',cursive; letter-spacing:1px; }}
+.summary-top3-label {{ font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }}
+.summary-top3-names {{ font-size:13px; color:var(--text); }}
+.summary-footer {{ margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.1); font-size:11px; color:var(--green); font-family:var(--font-pixel); font-weight:400; }}
 
 .screenshot-btn {{
     display:flex; align-items:center; justify-content:center; gap:10px;
-    font-family:'Silkscreen',cursive; font-size:16px;
+    font-family:var(--font-pixel); font-size:10px; font-weight:400; text-transform:uppercase; letter-spacing:0.3px;
     background:var(--green); color:#000; border:none;
     padding:16px 32px; border-radius:12px; margin-top:28px;
     cursor:pointer; transition:transform 0.2s,background 0.2s;
@@ -554,13 +713,19 @@ for (let i = 0; i < total; i++) {{
 }}
 const dots = progressEl.querySelectorAll('.dot');
 
+const slides = gallery.querySelectorAll('.slide');
+
 function goTo(idx) {{
     if (idx < 0 || idx >= total) return;
+    // Remove active from all slides
+    slides.forEach(s => s.classList.remove('active'));
     current = idx;
     gallery.style.transform = `translateX(-${{current * 100}}vw)`;
     dots.forEach((d, i) => d.classList.toggle('active', i === current));
     prevBtn.classList.toggle('hidden', current === 0);
     nextBtn.classList.toggle('hidden', current === total - 1);
+    // Add active to current slide after a tiny delay for animation reset
+    setTimeout(() => slides[current].classList.add('active'), 50);
 }}
 
 document.addEventListener('click', (e) => {{
@@ -611,7 +776,7 @@ def main():
     args = parser.parse_args()
     
     print("\n" + "="*50)
-    print("  iMESSAGE WRAPPED 2025 | wrap2025.com")
+    print("  iMessage WRAPPED 2025 | wrap2025.com")
     print("="*50 + "\n")
     
     print("[*] Checking access...")
