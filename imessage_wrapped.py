@@ -669,7 +669,7 @@ def gen_html(d, contacts, path):
 
     # Slide 17: Ghosted
     if d['ghosted']:
-        ghost_html = ''.join([f'<div class="rank-item"><span class="rank-num">👻</span><span class="rank-name">{n(h)}</span><span class="rank-count"><span class="green">{b}</span>→<span class="red">{a}</span></span></div>' for h,b,a in d['ghosted'][:5]])
+        ghost_html = ''.join([f'<div class="rank-item"><span class="rank-num">👻</span><span class="rank-name">{n(h)}</span><span class="rank-count"><span class="green">{b}</span> → <span class="red">{a}</span></span></div>' for h,b,a in d['ghosted'][:5]])
         slides.append(f'''
         <div class="slide">
             <div class="slide-label">// GHOSTED</div>
