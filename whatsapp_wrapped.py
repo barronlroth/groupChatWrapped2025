@@ -710,6 +710,7 @@ body {{ font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(
 }}
 
 .slide {{
+    position:relative;
     min-width:100vw;
     height:100vh;
     display:flex;
@@ -1179,9 +1180,12 @@ async function saveSlide(slideEl, filename, btn) {{
     const watermark = slideEl.querySelector('.slide-watermark');
     if (watermark) watermark.style.display = 'block';
     btn.style.opacity = '0';
+    // Get computed background color (html2canvas has issues with CSS variables)
+    const computedBg = getComputedStyle(slideEl).backgroundColor;
+    const bgColor = computedBg && computedBg !== 'rgba(0, 0, 0, 0)' ? computedBg : '#0a0a12';
     try {{
         const canvas = await html2canvas(slideEl, {{
-            backgroundColor: null,
+            backgroundColor: bgColor,
             scale: 2,
             logging: false,
             useCORS: true,
