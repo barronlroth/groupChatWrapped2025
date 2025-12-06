@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>iMessage Wrapped 2025 | Your Texting Stats Revealed</title>
+<title>Wrapped 2025 | iMessage & WhatsApp Stats Revealed</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌯</text></svg>">
 <link rel="canonical" href="https://wrap2025.com">
 
 <!-- Primary Meta Tags -->
-<meta name="title" content="iMessage Wrapped 2025 | Your Texting Stats Revealed">
-<meta name="description" content="Your 2025 texting habits, exposed. See your most texted contacts, response time, personality type, and more. 100% local, runs in 30 seconds on your Mac.">
-<meta name="keywords" content="iMessage Wrapped, iMessage stats, texting statistics, 2025 wrapped, message analytics, iMessage analysis, text message insights, macOS app, privacy-first">
+<meta name="title" content="Wrapped 2025 | iMessage & WhatsApp Stats Revealed">
+<meta name="description" content="Your 2025 texting habits, exposed. See your most texted contacts, response time, personality type, and more. Works with iMessage and WhatsApp. 100% local, runs in 30 seconds on your Mac.">
+<meta name="keywords" content="iMessage Wrapped, WhatsApp Wrapped, iMessage stats, WhatsApp stats, texting statistics, 2025 wrapped, message analytics, iMessage analysis, WhatsApp analysis, text message insights, macOS app, privacy-first">
 <meta name="author" content="Nikunj Kothari">
 <meta name="robots" content="index, follow">
 <meta name="language" content="English">
@@ -18,26 +18,26 @@
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://wrap2025.com">
-<meta property="og:title" content="iMessage Wrapped 2025 | Your Texting Stats Revealed">
-<meta property="og:description" content="Your texting habits, exposed. See who you text most, response time, personality type, and more. 100% local and private.">
+<meta property="og:title" content="Wrapped 2025 | iMessage & WhatsApp Stats Revealed">
+<meta property="og:description" content="Your texting habits, exposed. See who you text most, response time, personality type, and more. Works with iMessage and WhatsApp. 100% local and private.">
 <meta property="og:image" content="https://wrap2025.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:site_name" content="iMessage Wrapped 2025">
+<meta property="og:site_name" content="Wrapped 2025">
 <meta property="og:locale" content="en_US">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://wrap2025.com">
-<meta name="twitter:title" content="iMessage Wrapped 2025 | Your Texting Stats Revealed">
-<meta name="twitter:description" content="Your texting habits, exposed. See who you text most, response time, personality type, and more. 100% local and private.">
+<meta name="twitter:title" content="Wrapped 2025 | iMessage & WhatsApp Stats Revealed">
+<meta name="twitter:description" content="Your texting habits, exposed. See who you text most, response time, personality type, and more. Works with iMessage and WhatsApp. 100% local and private.">
 <meta name="twitter:image" content="https://wrap2025.com/og-image.png">
 <meta name="twitter:creator" content="@nikunj">
 
 <!-- Apple/iOS Meta Tags -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="iMessage Wrapped">
+<meta name="apple-mobile-web-app-title" content="Wrapped 2025">
 
 <!-- Theme Color -->
 <meta name="theme-color" content="#0a0a12">
@@ -48,8 +48,8 @@
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "iMessage Wrapped 2025",
-  "description": "Your 2025 texting habits, exposed. See your most texted contacts, response time, personality type, and more.",
+  "name": "Wrapped 2025",
+  "description": "Your 2025 texting habits, exposed. See your most texted contacts, response time, personality type, and more. Works with iMessage and WhatsApp.",
   "url": "https://wrap2025.com",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "macOS",
@@ -63,8 +63,8 @@
     "name": "Nikunj Kothari",
     "url": "https://x.com/nikunj"
   },
-  "softwareRequirements": "macOS with iMessage",
-  "featureList": ["Message statistics", "Top contacts analysis", "Personality type detection", "Response time tracking", "100% local processing", "Privacy-first design"]
+  "softwareRequirements": "macOS with iMessage or WhatsApp",
+  "featureList": ["Message statistics", "Top contacts analysis", "Personality type detection", "Response time tracking", "100% local processing", "Privacy-first design", "iMessage support", "WhatsApp support"]
 }
 </script>
 <style>
@@ -669,29 +669,17 @@ kbd {
 /* PRIVACY */
 .privacy-section {
     padding: 80px 0;
-    position: relative;
-}
-
-.privacy-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
 }
 
 .privacy-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
 }
 
 .privacy-text {
     color: var(--muted);
-    font-size: 18px;
+    font-size: 17px;
     line-height: 1.7;
 }
 
@@ -712,7 +700,8 @@ kbd {
     border: 1px solid rgba(74, 222, 128, 0.2);
     border-radius: 8px;
     padding: 12px 16px;
-    font-size: 15px;
+    font-size: 14px;
+    margin-top: 8px;
 }
 
 .privacy-highlight em {
@@ -723,18 +712,18 @@ kbd {
 .privacy-badges {
     display: flex;
     gap: 12px;
-    justify-content: flex-end;
+    flex-wrap: wrap;
 }
 
 .privacy-badge {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: var(--card-bg);
     border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    padding: 16px 24px;
-    font-size: 14px;
+    border-radius: 100px;
+    padding: 10px 18px;
+    font-size: 13px;
     transition: all 0.3s;
 }
 
@@ -742,14 +731,10 @@ kbd {
     border-color: var(--border-hover);
 }
 
-.privacy-badge-icon { font-size: 20px; }
+.privacy-badge-icon { font-size: 16px; }
 
 .verify-section {
-    grid-column: 1 / -1;
-    text-align: center;
-    margin-top: 32px;
-    padding-top: 32px;
-    border-top: 1px solid var(--border-subtle);
+    margin-top: 24px;
 }
 
 .verify-text {
@@ -844,6 +829,61 @@ kbd {
     text-decoration: none;
 }
 
+/* Platform Selector */
+.platform-selector {
+    display: inline-flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    background: var(--code-bg);
+    border-radius: 100px;
+    padding: 4px;
+    border: 1px solid var(--border-subtle);
+}
+
+.platform-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    white-space: nowrap;
+}
+
+.platform-tab:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.05);
+}
+
+.platform-tab.active {
+    background: var(--green);
+    color: #000;
+}
+
+.platform-tab.active.whatsapp {
+    background: #25D366;
+}
+
+.platform-tab .icon {
+    font-size: 14px;
+}
+
+/* Platform-specific content */
+.platform-content {
+    display: none;
+}
+
+.platform-content.active {
+    display: block;
+}
+
 /* RESPONSIVE - TABLET */
 @media (max-width: 1024px) {
     .hero {
@@ -874,14 +914,6 @@ kbd {
     }
 
 
-    .privacy-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-
-    .privacy-badges {
-        justify-content: center;
-    }
 
     .footer-content {
         flex-direction: column;
@@ -989,21 +1021,12 @@ kbd {
         padding: 60px 0;
     }
 
-    .privacy-text { font-size: 16px; }
-
-    .privacy-badges {
-        flex-direction: row;
-        justify-content: center;
-        gap: 12px;
-    }
+    .privacy-text { font-size: 15px; }
+    .privacy-highlight { font-size: 13px; }
 
     .privacy-badge {
-        padding: 12px 16px;
-        font-size: 13px;
-    }
-
-    .privacy-badge-icon {
-        font-size: 16px;
+        padding: 8px 14px;
+        font-size: 12px;
     }
 }
 </style>
@@ -1018,20 +1041,17 @@ kbd {
 <section class="hero">
     <div class="hero-content">
         <div class="hero-badge">Your year in texts</div>
-        <h1>iMESSAGE<span class="accent">WRAPPED</span></h1>
-        <p class="subtitle">Your texting habits, exposed. See who you text most, your response time, personality type, and more.</p>
+
+        <h1>YOUR MESSAGES<span class="accent">WRAPPED</span></h1>
+        <p class="subtitle">Your texting habits, exposed. See who you text most, your response time, personality type, and more. Works with iMessage and WhatsApp.</p>
+
         <div class="cta-group">
-            <button onclick="downloadScript()" class="cta-btn download-btn">
-                <span>⬇️</span>
-                <span>Download Script</span>
-            </button>
+            <a href="#install" class="cta-btn download-btn">
+                <span>Get Started</span>
+            </a>
             <button onclick="shareLink()" class="cta-btn share-btn">
-                <span>📤</span>
                 <span>Send to Your Mac</span>
             </button>
-            <a href="#install" class="cta-btn secondary">
-                <span>How it works</span>
-            </a>
         </div>
         <p class="mobile-note">Requires a Mac to run. Send yourself this link!</p>
         <div class="hero-meta">
@@ -1168,6 +1188,119 @@ kbd {
     </div>
 </section>
 
+<section class="install-section" id="install">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label">// HOW TO RUN</div>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="platform-selector" style="margin-bottom: 24px;">
+            <button class="platform-tab active" onclick="selectPlatform('imessage')">
+                <span class="icon">📱</span>
+                <span>iMessage</span>
+            </button>
+            <button class="platform-tab whatsapp" onclick="selectPlatform('whatsapp')">
+                <span class="icon">💬</span>
+                <span>WhatsApp</span>
+            </button>
+        </div>
+
+        <div id="imessage-install" class="platform-content active">
+            <div class="steps-list">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h3>Open Terminal</h3>
+                        <p>Press <kbd>⌘</kbd> + <kbd>Space</kbd>, type "Terminal", hit Enter</p>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h3>Grant disk access</h3>
+                        <p>System Settings → Privacy & Security → Full Disk Access → click the <kbd>+</kbd> button → navigate to Applications/Utilities/Terminal</p>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h3>Download the script</h3>
+                        <p>Paste in Terminal and hit Enter, or <a href="#" onclick="downloadScript(true); return false;" style="color: var(--green); text-decoration: underline;">download here</a>:</p>
+                        <div class="code-block">
+                            <code id="curl-cmd-imessage">curl -O https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/imessage_wrapped.py</code>
+                            <button class="copy-btn" onclick="copyCode('curl-cmd-imessage', this)">COPY</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">4</div>
+                    <div class="step-content">
+                        <h3>Run it</h3>
+                        <p>Paste in Terminal and hit Enter:</p>
+                        <div class="code-block">
+                            <code id="run-cmd-imessage">python3 imessage_wrapped.py</code>
+                            <button class="copy-btn" onclick="copyCode('run-cmd-imessage', this)">COPY</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="whatsapp-install" class="platform-content">
+            <div class="steps-list">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h3>Open Terminal</h3>
+                        <p>Press <kbd>⌘</kbd> + <kbd>Space</kbd>, type "Terminal", hit Enter</p>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h3>Grant disk access</h3>
+                        <p>System Settings → Privacy & Security → Full Disk Access → click the <kbd>+</kbd> button → navigate to Applications/Utilities/Terminal</p>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h3>Download the script</h3>
+                        <p>Paste in Terminal and hit Enter, or <a href="#" onclick="downloadScript(true); return false;" style="color: #25D366; text-decoration: underline;">download here</a>:</p>
+                        <div class="code-block">
+                            <code id="curl-cmd-whatsapp">curl -O https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/whatsapp_wrapped.py</code>
+                            <button class="copy-btn" onclick="copyCode('curl-cmd-whatsapp', this)">COPY</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-num">4</div>
+                    <div class="step-content">
+                        <h3>Run it</h3>
+                        <p>Paste in Terminal and hit Enter:</p>
+                        <div class="code-block">
+                            <code id="run-cmd-whatsapp">python3 whatsapp_wrapped.py</code>
+                            <button class="copy-btn" onclick="copyCode('run-cmd-whatsapp', this)">COPY</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️</strong>
+            <span>Not enough 2025 messages? Use the <code>--use-2024</code> flag.</span>
+        </div>
+    </div>
+</section>
+
 <section class="features">
     <div class="container">
         <div class="section-header">
@@ -1235,62 +1368,6 @@ kbd {
     </div>
 </section>
 
-<section class="install-section" id="install">
-    <div class="container">
-        <div class="section-header">
-            <div class="section-label">// HOW TO RUN</div>
-            <div class="section-line"></div>
-        </div>
-
-        <div class="steps-list">
-            <div class="step-item">
-                <div class="step-num">1</div>
-                <div class="step-content">
-                    <h3>Open Terminal</h3>
-                    <p>Press <kbd>⌘</kbd> + <kbd>Space</kbd>, type "Terminal", hit Enter</p>
-                </div>
-            </div>
-
-            <div class="step-item">
-                <div class="step-num">2</div>
-                <div class="step-content">
-                    <h3>Grant disk access</h3>
-                    <p>System Settings → Privacy & Security → Full Disk Access → click the <kbd>+</kbd> button → navigate to Applications/Utilities/Terminal</p>
-                </div>
-            </div>
-
-            <div class="step-item">
-                <div class="step-num">3</div>
-                <div class="step-content">
-                    <h3>Download the script</h3>
-                    <p>Paste in Terminal and hit Enter, or <a href="#" onclick="downloadScript(true); return false;" style="color: var(--green); text-decoration: underline;">download here</a>:</p>
-                    <div class="code-block">
-                        <code id="curl-cmd">curl -O https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/imessage_wrapped.py</code>
-                        <button class="copy-btn" onclick="copyCode('curl-cmd', this)">COPY</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="step-item">
-                <div class="step-num">4</div>
-                <div class="step-content">
-                    <h3>Run it</h3>
-                    <p>Paste in Terminal and hit Enter:</p>
-                    <div class="code-block">
-                        <code id="run-cmd">python3 imessage_wrapped.py</code>
-                        <button class="copy-btn" onclick="copyCode('run-cmd', this)">COPY</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="warning">
-            <strong>⚠️</strong>
-            <span>Not enough 2025 messages? Use the <code>--use-2024</code> flag.</span>
-        </div>
-    </div>
-</section>
-
 <footer class="footer">
     <div class="container">
         <div class="footer-content">
@@ -1307,6 +1384,36 @@ kbd {
 </footer>
 
 <script>
+// Platform Selection
+let currentPlatform = 'imessage';
+
+function selectPlatform(platform) {
+    currentPlatform = platform;
+
+    // Update all platform tabs
+    document.querySelectorAll('.platform-tab').forEach(tab => {
+        const isActive = tab.textContent.toLowerCase().includes(platform === 'imessage' ? 'imessage' : 'whatsapp');
+        tab.classList.toggle('active', isActive);
+    });
+
+    // Update install content
+    const imessageInstall = document.getElementById('imessage-install');
+    const whatsappInstall = document.getElementById('whatsapp-install');
+    if (imessageInstall) imessageInstall.classList.toggle('active', platform === 'imessage');
+    if (whatsappInstall) whatsappInstall.classList.toggle('active', platform === 'whatsapp');
+
+    // Save preference
+    localStorage.setItem('platform', platform);
+}
+
+// Load saved platform preference
+(function() {
+    const saved = localStorage.getItem('platform');
+    if (saved) {
+        selectPlatform(saved);
+    }
+})();
+
 // Theme Toggle
 function toggleTheme() {
     const body = document.body;
@@ -1439,20 +1546,23 @@ async function downloadScript(skipScroll = false) {
     const btn = document.querySelector('.download-btn');
     const originalContent = btn ? btn.innerHTML : null;
 
+    const scriptName = currentPlatform === 'whatsapp' ? 'whatsapp_wrapped.py' : 'imessage_wrapped.py';
+    const scriptUrl = `https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/${scriptName}`;
+
     try {
         if (btn) {
             btn.innerHTML = '<span>⏳</span><span>Downloading...</span>';
             btn.disabled = true;
         }
 
-        const response = await fetch('https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/imessage_wrapped.py');
+        const response = await fetch(scriptUrl);
         if (!response.ok) throw new Error('Download failed');
 
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'imessage_wrapped.py';
+        a.download = scriptName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1528,19 +1638,23 @@ async function copyScriptForReview() {
     const btnIcon = btn.querySelector('.verify-btn-icon');
     const originalText = btnText.textContent;
 
+    const scriptName = currentPlatform === 'whatsapp' ? 'whatsapp_wrapped.py' : 'imessage_wrapped.py';
+    const scriptUrl = `https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/${scriptName}`;
+    const dbType = currentPlatform === 'whatsapp' ? 'WhatsApp database' : 'iMessage database and AddressBook';
+
     try {
         btnText.textContent = 'Fetching script...';
         btnIcon.textContent = '⏳';
 
         let scriptContent;
         try {
-            const response = await fetch('https://raw.githubusercontent.com/kothari-nikunj/wrap2025/main/imessage_wrapped.py');
+            const response = await fetch(scriptUrl);
             if (!response.ok) throw new Error('Failed to fetch');
             scriptContent = await response.text();
         } catch (fetchErr) {
             // Fetch failed - show clickable link as fallback
             console.error('Fetch error:', fetchErr);
-            btnText.innerHTML = '<a href="https://github.com/kothari-nikunj/wrap2025/blob/main/imessage_wrapped.py" target="_blank" style="color: inherit; text-decoration: underline;">Click to view on GitHub</a>';
+            btnText.innerHTML = `<a href="https://github.com/kothari-nikunj/wrap2025/blob/main/${scriptName}" target="_blank" style="color: inherit; text-decoration: underline;">Click to view on GitHub</a>`;
             btnIcon.textContent = '🔗';
             setTimeout(() => {
                 btnText.textContent = originalText;
@@ -1551,7 +1665,7 @@ async function copyScriptForReview() {
 
         const reviewPrompt = `Please review this Python script for security concerns. Verify that:
 1. It does NOT send any data over the network
-2. It only reads local files (iMessage database and AddressBook)
+2. It only reads local files (${dbType})
 3. It generates an HTML file locally
 4. It does NOT access any sensitive message content (only metadata + emojis)
 
@@ -1572,7 +1686,7 @@ ${scriptContent}`;
             }, 4000);
         } else {
             // Both clipboard methods failed - show clickable link as last resort
-            btnText.innerHTML = '<a href="https://github.com/kothari-nikunj/wrap2025/blob/main/imessage_wrapped.py" target="_blank" style="color: inherit; text-decoration: underline;">Click to view on GitHub</a>';
+            btnText.innerHTML = `<a href="https://github.com/kothari-nikunj/wrap2025/blob/main/${scriptName}" target="_blank" style="color: inherit; text-decoration: underline;">Click to view on GitHub</a>`;
             btnIcon.textContent = '🔗';
             setTimeout(() => {
                 btnText.textContent = originalText;
@@ -1592,9 +1706,10 @@ ${scriptContent}`;
 
 // Share functionality for mobile
 async function shareLink() {
+    const platform = currentPlatform === 'whatsapp' ? 'WhatsApp' : 'iMessage';
     const shareData = {
-        title: 'iMessage Wrapped 2025',
-        text: 'See your 2025 texting stats! Run this on your Mac:',
+        title: `${platform} Wrapped 2025`,
+        text: `See your 2025 ${platform} texting stats! Run this on your Mac:`,
         url: 'https://wrap2025.com'
     };
 
