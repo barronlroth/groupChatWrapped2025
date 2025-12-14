@@ -18,6 +18,7 @@ Your texting habits, exposed. A Spotify Wrapped-style visualization of your iMes
 - **Who texts first** - conversation initiator %
 - **Group chat stats** - your group chat activity overview
 - **Top group chats** - your most active group conversations
+- **Groupchat wrapped (single chat)** - pick one group chat + awards (e.g. most used emoji)
 - **Contribution graph** - GitHub-style activity heatmap of your messaging throughout the year
 
 ## Installation
@@ -42,6 +43,20 @@ The script needs to read your Messages database:
 
 ```bash
 python3 imessage_wrapped.py
+```
+
+### Groupchat Wrapped (iMessage, single chat)
+
+Generates a Wrapped-style deck for one specific iMessage group chat (2025 YTD) with awards like “most used emoji”.
+
+```bash
+python3 groupchat_wrapped.py
+```
+
+“Potty Mouth” uses a small built-in wordlist (no third-party install). Disable it with `--no-profanity`:
+
+```bash
+python3 groupchat_wrapped.py --no-profanity
 ```
 
 ---
@@ -117,6 +132,12 @@ python3 combined_wrapped.py --use-2024
 python3 imessage_wrapped.py -o my_wrapped.html
 python3 whatsapp_wrapped.py -o my_wrapped.html
 python3 combined_wrapped.py -o my_wrapped.html
+
+# Groupchat Wrapped (single iMessage group)
+python3 groupchat_wrapped.py --search "tennis"
+python3 groupchat_wrapped.py -o my_groupchat_wrapped.html
+python3 groupchat_wrapped.py --use-2024
+python3 groupchat_wrapped.py --chat-id 123 --no-open
 ```
 
 If you don't have enough 2025 messages yet, the script will automatically fall back to 2024.
