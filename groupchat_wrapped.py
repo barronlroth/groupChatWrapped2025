@@ -4,7 +4,7 @@ Groupchat Wrapped 2025 (iMessage) - pick one group chat and generate a Spotify W
 Usage: python3 groupchat_wrapped.py
 """
 
-import argparse, glob, html, os, re, sqlite3, subprocess, sys, threading, time
+import argparse, glob, html, os, re, sqlite3, subprocess, sys, threading, time, unicodedata
 from collections import Counter, defaultdict
 from datetime import datetime
 from urllib.parse import urlparse
@@ -651,6 +651,70 @@ def _is_emoji_base(cp):
     return False
 
 
+def _emoji_expected_points(text):
+    """
+    Heuristic: codepoints that are likely to be part of an emoji as-rendered.
+    Used only for debugging mismatches in extract_emojis().
+    """
+    points = []
+    if not text:
+        return points
+
+    extra_ranges = [
+        (0x2300, 0x23FF),  # misc technical (some emoji)
+        (0x2190, 0x21FF),  # arrows
+        (0x25A0, 0x25FF),  # geometric shapes
+        (0x2900, 0x297F),  # supplemental arrows-b
+        (0x2B00, 0x2BFF),  # misc symbols & arrows
+        (0x3000, 0x303F),  # CJK symbols & punctuation (3030 etc)
+        (0x3200, 0x32FF),  # enclosed CJK letters/months (3297/3299 etc)
+    ]
+    extra_singletons = {0x00A9, 0x00AE, 0x203C, 0x2049, 0x2122, 0x2139, 0x24C2}
+
+    n = len(text)
+    for idx, ch in enumerate(text):
+        cp = ord(ch)
+
+        if _is_emoji_base(cp):
+            points.append((idx, ch, cp, "base-range"))
+            continue
+
+        if cp in extra_singletons:
+            points.append((idx, ch, cp, "common-emoji"))
+            continue
+
+        # Keycap sequences: [0-9#*] + VS16? + KEYCAP
+        if ch in "0123456789#*" and idx + 1 < n:
+            j = idx + 1
+            if j < n and ord(text[j]) == VS16:
+                j += 1
+            if j < n and ord(text[j]) == KEYCAP:
+                points.append((idx, ch, cp, "keycap"))
+                continue
+
+        for start, end in extra_ranges:
+            if start <= cp <= end:
+                points.append((idx, ch, cp, "emoji-adjacent-range"))
+                break
+        else:
+            # Variation selector 16 typically indicates emoji presentation.
+            if idx + 1 < n and ord(text[idx + 1]) == VS16:
+                points.append((idx, ch, cp, "has-vs16"))
+
+    return points
+
+
+def _uplus(cp):
+    return f"U+{cp:04X}"
+
+
+def _uname(ch):
+    try:
+        return unicodedata.name(ch)
+    except Exception:
+        return "UNKNOWN"
+
+
 def extract_emojis(text):
     emojis = []
     i = 0
@@ -925,7 +989,7 @@ def load_group_chat_messages(chat_id, ts_start):
     return msgs
 
 
-def analyze_group_chat(chat, ts_start, year, contacts, profanity_words):
+def analyze_group_chat(chat, ts_start, year, contacts, profanity_words, debug_emojis=False, debug_emoji_limit=25):
     chat_id = chat["chat_id"]
     participants = get_group_chat_participants(chat_id)
     participant_names = [get_name(h, contacts) for h in participants]
@@ -949,6 +1013,10 @@ def analyze_group_chat(chat, ts_start, year, contacts, profanity_words):
     sender_link_counts = Counter()
     sender_link_domain_counts = defaultdict(Counter)
     sender_laugh_received_counts = Counter()
+    debug_emoji_printed = 0
+    debug_emoji_msgs_with_expected = 0
+    debug_emoji_msgs_with_extracted = 0
+    debug_emoji_msgs_mismatch = 0
 
     analyzed_text_msgs = 0
     for m in msgs:
@@ -994,7 +1062,38 @@ def analyze_group_chat(chat, ts_start, year, contacts, profanity_words):
                 sender_profanity_counts[sender] += len(prof_terms)
                 sender_profanity_term_counts[sender].update(prof_terms)
 
+        blob_text = _decode_blob(m.get("attributed_body"))
         ems = extract_emojis(cleaned)
+        expected = []
+        expected_source = "text"
+        if cleaned:
+            expected = _emoji_expected_points(cleaned)
+        elif blob_text:
+            expected = _emoji_expected_points(blob_text)
+            expected_source = "attributed_body"
+
+        if expected:
+            debug_emoji_msgs_with_expected += 1
+        if ems:
+            debug_emoji_msgs_with_extracted += 1
+
+        if debug_emojis and debug_emoji_printed < int(debug_emoji_limit or 0):
+            if expected:
+                extracted_cps = {ord(ch) for seq in ems for ch in seq}
+                missing = [p for p in expected if p[2] not in extracted_cps]
+                if missing:
+                    debug_emoji_msgs_mismatch += 1
+                    preview = cleaned if cleaned else blob_text
+                    if len(preview) > 220:
+                        preview = preview[:220] + "…"
+                    print("\n[debug-emojis] sender:", sender)
+                    print(f"[debug-emojis] source: {expected_source}")
+                    print("[debug-emojis] text:", preview)
+                    print("[debug-emojis] extracted:", ems)
+                    for idx, ch, cp, reason in missing[:20]:
+                        print(f"[debug-emojis] missed idx={idx} {reason} {repr(ch)} {_uplus(cp)} {_uname(ch)}")
+                    debug_emoji_printed += 1
+
         if not ems:
             continue
 
@@ -1002,6 +1101,16 @@ def analyze_group_chat(chat, ts_start, year, contacts, profanity_words):
         sender_emoji_counts[sender] += len(ems)
         for e in ems:
             sender_unique_emoji[sender].add(e)
+
+    if debug_emojis:
+        print(
+            "\n[debug-emojis] summary:"
+            f" total_messages={len(msgs)}"
+            f" with_expected={debug_emoji_msgs_with_expected}"
+            f" with_extracted={debug_emoji_msgs_with_extracted}"
+            f" mismatches_printed={debug_emoji_printed}"
+            f" mismatches_seen={debug_emoji_msgs_mismatch}"
+        )
 
     top_emojis = emoji_counts.most_common(10)
     most_used_emoji = top_emojis[0] if top_emojis else None
@@ -1485,6 +1594,13 @@ def main():
     parser.add_argument("--chat-id", type=int, help="Skip picker and analyze this chat ID")
     parser.add_argument("--no-open", action="store_true", help="Don't open the HTML automatically")
     parser.add_argument("--no-profanity", action="store_true", help="Disable the Potty Mouth profanity counter")
+    parser.add_argument("--debug-emojis", action="store_true", help="Print emoji extraction debug output")
+    parser.add_argument(
+        "--debug-emoji-limit",
+        type=int,
+        default=25,
+        help="How many debug-emoji messages to print",
+    )
     parser.add_argument("--debug-tapbacks", action="store_true", help="Print tapback diagnostics for the selected chat")
     parser.add_argument("--debug-limit", type=int, default=25, help="Rows to print for --debug-tapbacks")
     args = parser.parse_args()
@@ -1525,7 +1641,15 @@ def main():
     print("[*] Analyzing chat...")
     spinner.start("Reading messages...")
     profanity_words = set() if args.no_profanity else load_profanity_words()
-    data = analyze_group_chat(chat, ts_start, year, contacts, profanity_words)
+    data = analyze_group_chat(
+        chat,
+        ts_start,
+        year,
+        contacts,
+        profanity_words,
+        debug_emojis=bool(args.debug_emojis),
+        debug_emoji_limit=int(args.debug_emoji_limit),
+    )
     spinner.stop(f"{data['messages_analyzed']:,} messages scanned")
 
     print("[*] Generating report...")
